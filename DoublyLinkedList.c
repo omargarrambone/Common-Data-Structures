@@ -19,15 +19,15 @@ struct aiv_int_item
 };
 
 
-struct aiv_list_node* aiv_list_get_tail(struct aiv_list_node* head)
+struct aiv_list_node* aiv_list_get_tail(struct aiv_list_node** head)
 {
     if (!head)
     {
         return NULL;
     }
 
-    struct aiv_list_node* current_item = head;
-    struct aiv_list_node* last_item = head;
+    struct aiv_list_node* current_item = *head;
+    struct aiv_list_node* last_item = *head;
     while(current_item)
     { 
         last_item = current_item;
@@ -39,7 +39,7 @@ struct aiv_list_node* aiv_list_get_tail(struct aiv_list_node* head)
 
 struct aiv_list_node* aiv_list_append(struct aiv_list_node** head, struct aiv_list_node* item)
 {
-    struct aiv_list_node* tail = aiv_list_get_tail(*head);
+    struct aiv_list_node* tail = aiv_list_get_tail(head);
     if (!tail)
     {
         *head = item;
@@ -132,7 +132,6 @@ void aiv_insert_after_index(struct aiv_list_node** head, struct aiv_list_node* i
     }
 
     struct aiv_list_node* current_head = *head;
-    const unsigned int current_count = current_head->count;
 
     for (int i = 0; i < index; i++)
     {
@@ -145,6 +144,37 @@ void aiv_insert_after_index(struct aiv_list_node** head, struct aiv_list_node* i
     item->next = next_item;
 
     (*head)->count++;    
+}
+
+void aiv_insert_before_index(struct aiv_list_node** head, struct aiv_list_node* item, const unsigned int index)
+{
+    if (*head == NULL)
+    {
+        return;
+    }
+
+    struct aiv_list_node* current_head = *head;
+
+    // if (index == 0)
+    // {
+    //     *head = item;
+    //     current_head->next = item->next;
+    // }
+    
+    for (int i = 0; i < index; i++)
+    {
+        current_head = current_head->next;
+    }
+
+    struct aiv_list_node* prev_item = current_head->prev;
+    struct aiv_list_node* prev_prev_item = current_head->prev->prev;
+
+    current_head->prev = item;
+    item->prev = prev_item;
+    item->next = current_head;
+    prev_item->next = item;
+
+    (*head)->count++;        
 }
 
 int main(int argc, char** argv)
@@ -179,11 +209,11 @@ int main(int argc, char** argv)
     aiv_insert_after_index(&head, AIV_LIST(int_item6), 0);
     Print(head); //stampa della lista dopo aver aggiunto un nuovo item
 
+    struct aiv_int_item int_item7;
+    int_item7.value = 555; //valore da aggiungere dopo aver creato la lista
+    aiv_insert_before_index(&head, AIV_LIST(int_item7), 3);
+    Print(head); //stampa della lista dopo aver aggiunto un nuovo item
 
-
-    aiv_list_remove(&head, 3);
-
-
-
+    aiv_list_remove(&head, 5);
     Print(head);//stampa della lista dopo il remove
 }
